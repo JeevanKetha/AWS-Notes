@@ -1,0 +1,321 @@
+AWS S3
+Use Cases:
+Backup & Storage
+Disaster Recovery
+Archive
+Hybrid Cloud Storage
+Application Hosting
+Media Hosting
+Data Lakes & Big Data Analytics
+Software Delivery
+Static Websites
+Amazon S3 - Buckets
+Definition: Amazon S3 allows people to store objects (files) in "buckets" (directories).
+
+Bucket Requirements:
+
+Must have a globally unique name (across all regions and accounts).
+Defined at the region level.
+S3 appears as a global service, but buckets are created within specific regions.
+Naming Convention:
+
+No uppercase letters, no underscores.
+Length: 3–63 characters.
+Must not be an IP address.
+Must start with a lowercase letter or number.
+Must not start with the prefix xn--.
+Must not end with the suffix -s3alias.
+Amazon S3 - Objects
+Objects (files):
+
+Have a key, which is the full path.
+
+Example 1: s3://my-bucket/my-file.txt
+Example 2: s3://my-bucket/my-folder/another-folder/my-file.txt
+A key consists of a prefix + object name.
+Example: s3://my-bucket/my-folder/another-folder/my-file.txt
+No Directories:
+There are no directories within buckets. Instead:
+Keys are long names containing slashes (/), mimicking a folder structure.
+
+Amazon S3 - Security
+User-Based Security
+IAM Policies: Define which API calls are allowed for specific users using IAM.
+Resource-Based Security
+Bucket Policies:
+Define bucket-wide rules from the S3 console.
+Enable cross-account access.
+Object Access Control List (ACL):
+Grants fine-grained access at the object level.
+(Note: Object ACLs are often disabled).
+Bucket Access Control List (ACL):
+Less common; controls bucket-level access.
+Notes:
+An IAM principal can access S3 objects if:
+Their user IAM permissions allow it OR the resource policy allows it.
+AND there’s no explicit deny.
+Encryption:
+Objects in Amazon S3 can be encrypted using encryption keys.
+Amazon S3 - Static Website Hosting
+S3 can host static websites, making them accessible on the internet.
+The website URL depends on the region of the bucket.
+Error Handling:
+If a 403 Forbidden error occurs, ensure the bucket policy allows public access.
+
+
+
+
+**Amazon S3 Versioning**
+
+* You can version your files in Amazon S3.
+* It is enabled at the bucket level.
+* Same key overwrites will change the version number (e.g., 1, 2, 3).
+* It is a best practice to version your buckets.
+
+**Benefits of Versioning**
+
+1. Protection against unintended deletes (ability to restore a version).
+2. Easy rollback to previous versions.
+
+**Notes**
+
+* Any files that were not versioned prior to enabling versioning will have version "null".
+* Suspending versioning does not delete previous versions.
+
+**Amazon S3 Replication**
+
+* Cross-Region Replication (CRR) and Same-Region Replication (SRR) require versioning to be enabled in both source and destination buckets.
+* CRR and SRR can be configured between buckets in different AWS accounts.
+* Copying is synchronous.
+* Proper IAM permissions must be granted to S3.
+
+**Use Cases**
+
+**For CRR:**
+
+* Compliance
+* Lower latency access
+* Replication across accounts
+
+**For SRR:**
+
+* Log aggregation
+* Live replication between production and test accounts
+
+**Important Considerations**
+
+* After enabling replication, only new objects are replicated.
+* There is no chaining of replication.
+
+
+
+Amazon S3 Durability and Availability
+
+Durability
+
+High durability (99.999999999%) of objects across multiple Availability Zones (AZs).
+If you store 10,000,000 objects with Amazon S3, you can on average expect to incur a loss of a single object once every 10,000 years.
+Same for all storage classes.
+Availability
+
+Measures how readily available a service is.
+Varies depending on storage class.   
+S3 Standard has 99.99% availability = not available 55 minutes a year.
+S3 Storage Classes
+
+S3 Standard - General Purpose
+
+99.99% Availability
+Used for frequently accessed data
+Low latency and high throughput
+Can sustain 2 concurrent facility failures
+Use Cases: Big Data analytics, mobile & gaming applications, Content distribution   
+S3 Standard - Infrequent Access (S3 Standard-IA)   
+
+99.9% Availability
+For data that is less frequently accessed but requires rapid access when needed
+Lower cost than S3 Standard
+Use Cases: Disaster Recovery, backups   
+
+
+
+Amazon S3 One Zone - Infrequent Access (S3 One Zone-IA)
+
+High durability (99.999999999%) of objects across a single AZ.
+99.5% Availability
+Use Cases: Storing secondary back up copies of on-premise data or data you don't need to access frequently.
+S3 Glacier Storage Classes
+
+Low-cost object storage meant for archiving/backup
+Pricing: Price for storage & object retrieval cost
+Amazon S3 Glacier Instant Retrieval   
+
+Millisecond retrieval, great for data accessed once a quarter.
+Minimum storage duration of 90 days
+Amazon S3 Glacier Flexible Retrieval (formerly Amazon S3 Glacier)
+
+Expedited (to 5min), Standard (3 to 5 hours), Bulk (5 to 12 hours) - Retrieval options   
+Minimum storage duration of 90 days
+Amazon S3 Glacier Deep Archive for long term storage
+
+Standard (12 hours), Bulk (48 hours) - Retrieval options   
+Minimum storage duration of 180 days
+S3 Intelligent-Tiering
+
+Small monthly monitoring and auto-tiering fee
+Moves objects automatically between Access Tiers based on usage   
+Important Notes
+
+There are no retrieval charges in S3 Intelligent-Tiering.
+Frequent Access tier (automatic): default tier
+Infrequent Access tier (automatic): objects not accessed for 30 days
+Archive Instant Access (automatic): objects not accessed for 120 days   
+Archive Access tier (optional): configurable from 90 days to 1000 days
+Deep Archive Access tier (optional): configurable from 180 days to 1000 days
+Additional Notes
+
+
+AWS EC2 Instance Metadata
+
+Powerful but lesser-known feature.
+Allows EC2 instances to learn about themselves without using an IAM role.
+URL: http://169.254.169.254/latest/meta-data
+Accessible only from within the EC2 instance.
+Can retrieve IAM role name but not IAM policy.
+Metadata = Info about the EC2 instance
+User data = Launch script of the EC2 instance
+AWS SDK Overview
+
+Use AWS SDK when coding against AWS services like DynamoDB.
+AWS CLI uses the Python SDK (boto3)
+If no default region is specified, us-east-1 is chosen by default.
+Amazon S3 - Moving between Storage Classes
+
+You can transition objects between storage classes.
+Move infrequently accessed objects to Standard-IA.
+Move archive objects that don't need fast access to Glacier or Glacier Deep Archive.
+Moving objects can be automated using lifecycle rules.
+Additional Notes
+
+
+Amazon S3 Baseline Performance
+
+Automatically scales to high request rates, latency 100-200ms.
+Can achieve at least 3,500 PUT/COPY/POST/DELETE and 5,500 GET/HEAD requests per second per prefix in a bucket.
+No limits on the number of prefixes in a bucket.   
+Prefix means the object path that comes in the middle of bucket/file.
+By spreading reads across 4 prefixes evenly, you can achieve 22,000 requests per second for GET and HEAD.
+Amazon S3 Performance
+
+Multi-Part Upload
+Recommended for files >100MB, must-use for files >5GB.
+Helps parallelize uploads (speeds up transfers).
+S3 Transfer Acceleration
+Increases transfer speed by transferring files to an AWS edge location which will forward the data to the S3 bucket in the target region.   
+Compatible with multi-part upload.   
+Meant for uploading files to a different region. The file is uploaded through the public network to the edge location and from the edge location, it is done by AWS private network.
+S3 Byte & Range Fetches
+Parallelize GETs by requesting specific byte ranges.
+Better resilience in case of failures.
+Can be used to retrieve only partial data.   
+
+
+Amazon S3 Object Encryption
+
+You can encrypt objects in S3 buckets using one of four methods.
+Server-Side Encryption (SSE)
+
+Server-Side Encryption with Amazon S3-Managed Keys (SSE-S3)
+Encrypts S3 objects using keys handled, managed, and owned by AWS.   
+Encryption type is AES-256.
+Must set header x-amz-server-side-encryption: AES256.
+Server-Side Encryption with KMS Keys stored in AWS KMS (SSE-KMS)
+Leverages AWS Key Management Service (AWS KMS) to manage encryption.   
+KMS advantages: user control, audit key usage, CloudTrail.
+Object is encrypted server-side.
+Must set header x-amz-server-side-encryption: aws:kms.
+Server-Side Encryption with Customer-Provided Keys (SSE-C)
+When you want to manage your own encryption keys.   
+Server-side encryption using keys fully managed by the customer outside of AWS.
+Amazon S3 does not store the encryption key you provide.
+HTTPS must be used.   
+Encryption key must be provided in HTTP headers for every HTTP request made.   
+  
+Client-Side Encryption
+
+Not explicitly described in the image, but it's a method where you encrypt data before uploading it to S3. You're responsible for managing the encryption keys.
+Additional Notes
+
+
+
+
+Amazon S3 Durability and Availability
+
+Durability
+
+High durability (99.999999999%) of objects across multiple Availability Zones (AZs).
+If you store 10,000,000 objects with Amazon S3, you can on average expect to incur a loss of a single object once every 10,000 years.
+Same for all storage classes.
+Availability
+
+Measures how readily available a service is.
+Varies depending on storage class.   
+S3 Standard has 99.99% availability = not available 55 minutes a year.
+S3 Storage Classes
+
+S3 Standard - General Purpose
+
+99.99% Availability
+Used for frequently accessed data
+Low latency and high throughput
+Can sustain 2 concurrent facility failures
+Use Cases: Big Data analytics, mobile & gaming applications, Content distribution   
+S3 Standard - Infrequent Access (S3 Standard-IA)   
+
+99.9% Availability
+For data that is less frequently accessed but requires rapid access when needed
+Lower cost than S3 Standard
+Use Cases: Disaster Recovery, backups   
+
+
+Amazon S3 Encryption - Client-Side Encryption
+
+Clients must encrypt data themselves before sending to Amazon S3.
+Clients must decrypt data themselves when retrieving from Amazon S3.
+Customer fully manages the keys and encryption cycle.   
+CORS
+
+Cross-Origin Resource Sharing (CORS)
+Origin = scheme + protocol + host (domain + port)
+CORS is a web browser-based mechanism to allow requests to other origins while visiting the main origin.
+Requests won't be fulfilled unless the other origin allows for the request.
+Using CORS Headers (Example: Access-Control-Allow-Origin)
+Amazon S3 - MFA Delete
+
+MFA (Multi-Factor Authentication) forces users to generate a code on a device before doing important actions on S3.
+MFA will be required to:
+Permanently delete an object version
+Suspend versioning on the bucket
+MFA won't be required to:
+Enable versioning
+List deleted versions
+To use MFA delete, versioning must be enabled on the bucket.
+Only the bucket owner (root account) can enable/disable MFA Delete.   
+
+
+
+Amazon S3 - Pre-Signed URLs
+
+Generate pre-signed URLs using the S3 console, AWS CLI (or) SDK.
+URL Expiration
+
+S3 Console - 1 min up to 720 mins.
+AWS CLI - Configure expiration with --expires-in parameter (in seconds).1   
+1.
+github.com
+github.com
+User Permissions
+
+Users given a pre-signed URL inherit the permissions of the user that generated the URL for GET/PUT/DELETE.
+
+
